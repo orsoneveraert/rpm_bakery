@@ -1,33 +1,8 @@
 import streamlit as st
 import time
-from streamlit.components.v1 import html
 
 # Set page config for dark theme compatibility
 st.set_page_config(page_title="Mixer Timer and RPM Counter", layout="wide")
-
-# Function to detect dark mode
-def is_dark_mode():
-    return """
-    <script>
-    const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    window.parent.postMessage({darkMode: darkMode}, '*');
-    </script>
-    """
-
-# Function to create audio notification
-def create_audio_notification():
-    return """
-    <script>
-    function playNotification() {
-        var audio = new Audio('https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3');
-        audio.play();
-    }
-    </script>
-    """
-
-# Render dark mode detection script and audio notification
-html(is_dark_mode())
-html(create_audio_notification())
 
 # Initialize session state variables
 if 'start_time' not in st.session_state:
@@ -52,6 +27,8 @@ if 'countdown_time' not in st.session_state:
     st.session_state.countdown_time = 0
 if 'goal_reached' not in st.session_state:
     st.session_state.goal_reached = False
+if 'notified' not in st.session_state:
+    st.session_state.notified = False
 
 def format_time(seconds):
     hours = int(seconds // 3600)
@@ -61,6 +38,27 @@ def format_time(seconds):
 
 def calculate_turns(seconds, rpm):
     return (seconds / 60) * rpm
+
+def create_audio_notification():
+    return st.markdown(
+        """
+        <audio id="myAudio">
+          <source src="https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+        </audio>
+        <script>
+        var audio = document.getElementById("myAudio");
+        function playAudio() {
+            audio.play();
+        }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+def trigger_notification():
+    st.balloons()
+    st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
 
 # Language dictionary
 lang = {
@@ -108,6 +106,7 @@ lang = {
 
 # App layout
 st.title(lang[st.session_state.language]['title'])
+create_audio_notification()
 
 # Timer display
 timer_display = st.empty()
@@ -133,6 +132,7 @@ with col2:
         if st.session_state.rpm > 0:
             st.session_state.countdown_time = (rpm_goal / st.session_state.rpm) * 60
         st.session_state.goal_reached = False
+        st.session_state.notified = False
 
 # Timer logic
 current_time = time.time()
@@ -152,6 +152,7 @@ elif reset_btn:
     st.session_state.total_turns = 0
     st.session_state.last_turn_update = 0
     st.session_state.goal_reached = False
+    st.session_state.notified = False
 
 # Calculate current time and turns
 if st.session_state.is_running:
@@ -181,9 +182,9 @@ if st.session_state.rpm_goal > 0:
         st.info(f"{lang[st.session_state.language]['time_to_goal']}: {format_time(time_to_goal)}")
     elif time_to_goal == 0 and not st.session_state.goal_reached:
         st.success(lang[st.session_state.language]['goal_reached'])
-        st.balloons()  # Visual notification
-        html("<script>playNotification();</script>")  # Audio notification
+        trigger_notification()
         st.session_state.goal_reached = True
+        st.session_state.notified = True
     elif time_to_goal == 0:
         st.success(lang[st.session_state.language]['goal_reached'])
     else:
@@ -225,4 +226,8 @@ st.sidebar.selectbox(lang[st.session_state.language]['language'], ['English', 'F
 # Ensure continuous updates
 if st.session_state.is_running:
     time.sleep(0.1)
+    st.rerun()
+
+# Rerun the app if the goal is newly reached
+if st.session_state.goal_reached and not st.session_state.notified:
     st.rerun()
