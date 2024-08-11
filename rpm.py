@@ -57,7 +57,7 @@ def trigger_notification():
 # Language dictionary
 lang = {
     'en': {
-        'title': "Mixer Timer and RPM Counter",
+        'title': "RPM - Bakery,
         'start': "Start",
         'pause': "Pause",
         'reset': "Reset",
@@ -77,17 +77,17 @@ lang = {
         'time_over_goal': "Time Over Goal"
     },
     'fr': {
-        'title': "Minuteur et Compteur de TPM du Mélangeur",
+        'title': "Tour par minute - Boulangerie",
         'start': "Démarrer",
         'pause': "Pause",
         'reset': "Réinitialiser",
         'enter_rpm': "Entrer TPM",
         'turns': "tours",
-        'save_mixer': "Enregistrer les Vitesses du Mélangeur",
-        'mixer_name': "Nom du Mélangeur",
+        'save_mixer': "Enregistrer les Vitesses du pétrin",
+        'mixer_name': "Nom du pétrin",
         'speed': "Vitesse",
-        'save': "Enregistrer le Mélangeur",
-        'saved_mixers': "Mélangeurs Enregistrés",
+        'save': "Enregistrer le pétrin",
+        'saved_mixers': "Pétrins Enregistrés",
         'delete': "Supprimer",
         'language': "Langue",
         'rpm_goal': "Objectif TPM",
