@@ -7,6 +7,13 @@ import json
 # Set page config for dark theme compatibility
 st.set_page_config(page_title="Mixer Timer and RPM Counter", layout="wide")
 
+# Add "Buy Me a Coffee" button
+def add_buy_me_a_coffee():
+    button(username="your-username", floating=False, width=221)
+
+# Place the button in the top left
+add_buy_me_a_coffee()
+
 # Initialize EncryptedCookieManager
 cookies = EncryptedCookieManager(
     prefix="mixer_app/",
