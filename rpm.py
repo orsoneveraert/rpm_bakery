@@ -14,8 +14,20 @@ def is_dark_mode():
     </script>
     """
 
-# Render dark mode detection script
+# Function to create audio notification
+def create_audio_notification():
+    return """
+    <script>
+    function playNotification() {
+        var audio = new Audio('https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3');
+        audio.play();
+    }
+    </script>
+    """
+
+# Render dark mode detection script and audio notification
 html(is_dark_mode())
+html(create_audio_notification())
 
 # Initialize session state variables
 if 'start_time' not in st.session_state:
@@ -38,6 +50,8 @@ if 'rpm_goal' not in st.session_state:
     st.session_state.rpm_goal = 0
 if 'countdown_time' not in st.session_state:
     st.session_state.countdown_time = 0
+if 'goal_reached' not in st.session_state:
+    st.session_state.goal_reached = False
 
 def format_time(seconds):
     hours = int(seconds // 3600)
@@ -118,6 +132,7 @@ with col2:
         st.session_state.rpm_goal = rpm_goal
         if st.session_state.rpm > 0:
             st.session_state.countdown_time = (rpm_goal / st.session_state.rpm) * 60
+        st.session_state.goal_reached = False
 
 # Timer logic
 current_time = time.time()
@@ -136,6 +151,7 @@ elif reset_btn:
     st.session_state.elapsed_time = 0
     st.session_state.total_turns = 0
     st.session_state.last_turn_update = 0
+    st.session_state.goal_reached = False
 
 # Calculate current time and turns
 if st.session_state.is_running:
@@ -163,6 +179,11 @@ if st.session_state.rpm_goal > 0:
     time_to_goal = max(0, st.session_state.countdown_time - elapsed)
     if time_to_goal > 0:
         st.info(f"{lang[st.session_state.language]['time_to_goal']}: {format_time(time_to_goal)}")
+    elif time_to_goal == 0 and not st.session_state.goal_reached:
+        st.success(lang[st.session_state.language]['goal_reached'])
+        st.balloons()  # Visual notification
+        html("<script>playNotification();</script>")  # Audio notification
+        st.session_state.goal_reached = True
     elif time_to_goal == 0:
         st.success(lang[st.session_state.language]['goal_reached'])
     else:
