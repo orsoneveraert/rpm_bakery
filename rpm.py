@@ -1,6 +1,5 @@
 import streamlit as st
 import time
-from streamlit_extras.stoggle import stoggle
 
 # Set page config for dark theme compatibility
 st.set_page_config(page_title="Mixer Timer and RPM Counter", layout="wide")
@@ -85,7 +84,7 @@ lang = {
         'time_to_goal': "Time to Goal",
         'goal_reached': "Goal Reached!",
         'time_over_goal': "Time Over Goal",
-        'toggle_audio': "Toggle Audio"
+        'toggle_audio': "Enable Audio"
     },
     'fr': {
         'title': "Minuteur et Compteur de TPM du Mélangeur",
@@ -106,7 +105,7 @@ lang = {
         'time_to_goal': "Temps jusqu'à l'Objectif",
         'goal_reached': "Objectif Atteint !",
         'time_over_goal': "Temps Au-delà de l'Objectif",
-        'toggle_audio': "Activer/Désactiver l'Audio"
+        'toggle_audio': "Activer l'Audio"
     }
 }
 
@@ -117,28 +116,13 @@ create_audio_notification()
 # Audio toggle
 audio_col, _ = st.columns([1, 3])
 with audio_col:
-    stoggle(
+    st.session_state.audio_enabled = st.toggle(
         "🔊 " + lang[st.session_state.language]['toggle_audio'],
-        """
-        <div id="audio_status"></div>
-        <script>
-        const audioElement = document.getElementById("myAudio");
-        const audioStatus = document.getElementById("audio_status");
-        
-        if (audioElement) {
-            audioElement.play().then(() => {
-                audioStatus.innerHTML = "Audio is enabled and working.";
-            }).catch((error) => {
-                audioStatus.innerHTML = "Audio is enabled but couldn't play. Error: " + error;
-            });
-        } else {
-            audioStatus.innerHTML = "Audio element not found.";
-        }
-        </script>
-        """,
+        value=st.session_state.audio_enabled,
         key="audio_toggle"
     )
-    st.session_state.audio_enabled = st.session_state.audio_toggle
+    if st.session_state.audio_enabled:
+        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
 
 # Timer display
 timer_display = st.empty()
