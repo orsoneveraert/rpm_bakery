@@ -57,7 +57,7 @@ def trigger_notification():
 # Language dictionary
 lang = {
     'en': {
-        'title': "RPM - Bakery,
+        'title': "RPM - Bakery",
         'start': "Start",
         'pause': "Pause",
         'reset': "Reset",
