@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from streamlit_cookies_manager import EncryptedCookieManager
+from streamlit_extras.buy_me_a_coffee import button
 import time
 import json
 
