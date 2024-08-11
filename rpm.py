@@ -84,7 +84,8 @@ lang = {
         'time_to_goal': "Time to Goal",
         'goal_reached': "Goal Reached!",
         'time_over_goal': "Time Over Goal",
-        'enable_audio': "Enable Audio"
+        'enable_audio': "Enable Audio",
+        'disable_audio': "Disable Audio"
     },
     'fr': {
         'title': "Minuteur et Compteur de TPM du Mélangeur",
@@ -105,7 +106,8 @@ lang = {
         'time_to_goal': "Temps jusqu'à l'Objectif",
         'goal_reached': "Objectif Atteint !",
         'time_over_goal': "Temps Au-delà de l'Objectif",
-        'enable_audio': "Activer l'Audio"
+        'enable_audio': "Activer l'Audio",
+        'disable_audio': "Désactiver l'Audio"
     }
 }
 
@@ -113,13 +115,20 @@ lang = {
 st.title(lang[st.session_state.language]['title'])
 create_audio_notification()
 
-# Audio enable button
+# Audio toggle switch
 audio_col, _ = st.columns([1, 3])
 with audio_col:
-    if st.button("🔊 " + lang[st.session_state.language]['enable_audio']):
-        st.session_state.audio_enabled = True
-        st.success("Audio enabled!")
-        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
+    if st.session_state.audio_enabled:
+        if st.button("🔇 " + lang[st.session_state.language]['disable_audio']):
+            st.session_state.audio_enabled = False
+            st.success("Audio disabled!")
+            st.rerun()
+    else:
+        if st.button("🔊 " + lang[st.session_state.language]['enable_audio']):
+            st.session_state.audio_enabled = True
+            st.success("Audio enabled!")
+            st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
+            st.rerun()
 
 # Timer display
 timer_display = st.empty()
