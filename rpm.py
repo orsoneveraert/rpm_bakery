@@ -134,12 +134,11 @@ if start_btn and not st.session_state.is_running:
     if st.session_state.start_time is None:
         st.session_state.start_time = current_time
         st.session_state.last_turn_update = current_time
-    st.session_state.notified = False  # Reset notification when starting
+    st.session_state.notified = False
 elif pause_btn and st.session_state.is_running:
     st.session_state.is_running = False
     st.session_state.elapsed_time += current_time - st.session_state.start_time
     st.session_state.start_time = None
-    st.session_state.notified = False  # Reset notification when pausing
 elif reset_btn:
     st.session_state.is_running = False
     st.session_state.start_time = None
