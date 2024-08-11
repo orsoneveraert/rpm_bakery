@@ -1,5 +1,6 @@
 import streamlit as st
 import time
+from streamlit_extras.stoggle import stoggle
 
 # Set page config for dark theme compatibility
 st.set_page_config(page_title="Mixer Timer and RPM Counter", layout="wide")
@@ -84,8 +85,7 @@ lang = {
         'time_to_goal': "Time to Goal",
         'goal_reached': "Goal Reached!",
         'time_over_goal': "Time Over Goal",
-        'enable_audio': "Enable Audio",
-        'disable_audio': "Disable Audio"
+        'toggle_audio': "Toggle Audio"
     },
     'fr': {
         'title': "Minuteur et Compteur de TPM du Mélangeur",
@@ -106,8 +106,7 @@ lang = {
         'time_to_goal': "Temps jusqu'à l'Objectif",
         'goal_reached': "Objectif Atteint !",
         'time_over_goal': "Temps Au-delà de l'Objectif",
-        'enable_audio': "Activer l'Audio",
-        'disable_audio': "Désactiver l'Audio"
+        'toggle_audio': "Activer/Désactiver l'Audio"
     }
 }
 
@@ -115,20 +114,31 @@ lang = {
 st.title(lang[st.session_state.language]['title'])
 create_audio_notification()
 
-# Audio toggle switch
+# Audio toggle
 audio_col, _ = st.columns([1, 3])
 with audio_col:
-    if st.session_state.audio_enabled:
-        if st.button("🔇 " + lang[st.session_state.language]['disable_audio']):
-            st.session_state.audio_enabled = False
-            st.success("Audio disabled!")
-            st.rerun()
-    else:
-        if st.button("🔊 " + lang[st.session_state.language]['enable_audio']):
-            st.session_state.audio_enabled = True
-            st.success("Audio enabled!")
-            st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
-            st.rerun()
+    stoggle(
+        "🔊 " + lang[st.session_state.language]['toggle_audio'],
+        """
+        <div id="audio_status"></div>
+        <script>
+        const audioElement = document.getElementById("myAudio");
+        const audioStatus = document.getElementById("audio_status");
+        
+        if (audioElement) {
+            audioElement.play().then(() => {
+                audioStatus.innerHTML = "Audio is enabled and working.";
+            }).catch((error) => {
+                audioStatus.innerHTML = "Audio is enabled but couldn't play. Error: " + error;
+            });
+        } else {
+            audioStatus.innerHTML = "Audio element not found.";
+        }
+        </script>
+        """,
+        key="audio_toggle"
+    )
+    st.session_state.audio_enabled = st.session_state.audio_toggle
 
 # Timer display
 timer_display = st.empty()
