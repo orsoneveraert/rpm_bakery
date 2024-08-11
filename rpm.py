@@ -29,8 +29,6 @@ if 'goal_reached' not in st.session_state:
     st.session_state.goal_reached = False
 if 'notified' not in st.session_state:
     st.session_state.notified = False
-if 'audio_enabled' not in st.session_state:
-    st.session_state.audio_enabled = False
 
 def format_time(seconds):
     hours = int(seconds // 3600)
@@ -43,7 +41,7 @@ def calculate_turns(seconds, rpm):
 
 def play_notification_sound():
     html_string = """
-    <audio controls autoplay>
+    <audio autoplay style="display:none;">
       <source src="https://www.orangefreesounds.com/wp-content/uploads/2022/04/Small-bell-ringing-short-sound-effect.mp3" type="audio/mp3">
     </audio>
     """
@@ -54,8 +52,7 @@ def play_notification_sound():
 
 def trigger_notification():
     st.balloons()
-    if st.session_state.audio_enabled:
-        play_notification_sound()
+    play_notification_sound()
 
 # Language dictionary
 lang = {
@@ -77,8 +74,7 @@ lang = {
         'set_goal': "Set Goal",
         'time_to_goal': "Time to Goal",
         'goal_reached': "Goal Reached!",
-        'time_over_goal': "Time Over Goal",
-        'toggle_audio': "Enable Audio"
+        'time_over_goal': "Time Over Goal"
     },
     'fr': {
         'title': "Minuteur et Compteur de TPM du Mélangeur",
@@ -98,24 +94,12 @@ lang = {
         'set_goal': "Définir Objectif",
         'time_to_goal': "Temps jusqu'à l'Objectif",
         'goal_reached': "Objectif Atteint !",
-        'time_over_goal': "Temps Au-delà de l'Objectif",
-        'toggle_audio': "Activer l'Audio"
+        'time_over_goal': "Temps Au-delà de l'Objectif"
     }
 }
 
 # App layout
 st.title(lang[st.session_state.language]['title'])
-
-# Audio toggle
-audio_col, _ = st.columns([1, 3])
-with audio_col:
-    st.session_state.audio_enabled = st.toggle(
-        "🔊 " + lang[st.session_state.language]['toggle_audio'],
-        value=st.session_state.audio_enabled,
-        key="audio_toggle"
-    )
-    if st.session_state.audio_enabled:
-        play_notification_sound()
 
 # Timer display
 timer_display = st.empty()
@@ -150,10 +134,12 @@ if start_btn and not st.session_state.is_running:
     if st.session_state.start_time is None:
         st.session_state.start_time = current_time
         st.session_state.last_turn_update = current_time
+    st.session_state.notified = False  # Reset notification when starting
 elif pause_btn and st.session_state.is_running:
     st.session_state.is_running = False
     st.session_state.elapsed_time += current_time - st.session_state.start_time
     st.session_state.start_time = None
+    st.session_state.notified = False  # Reset notification when pausing
 elif reset_btn:
     st.session_state.is_running = False
     st.session_state.start_time = None
@@ -191,9 +177,10 @@ if st.session_state.rpm_goal > 0:
         st.info(f"{lang[st.session_state.language]['time_to_goal']}: {format_time(time_to_goal)}")
     elif time_to_goal == 0 and not st.session_state.goal_reached:
         st.success(lang[st.session_state.language]['goal_reached'])
-        trigger_notification()
+        if not st.session_state.notified:
+            trigger_notification()
+            st.session_state.notified = True
         st.session_state.goal_reached = True
-        st.session_state.notified = True
     elif time_to_goal == 0:
         st.success(lang[st.session_state.language]['goal_reached'])
     else:
