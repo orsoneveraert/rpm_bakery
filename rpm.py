@@ -42,7 +42,7 @@ def calculate_turns(seconds, rpm):
 def play_notification_sound():
     html_string = """
     <audio autoplay style="display:none;">
-      <source src="https://github.com/orsoneveraert/rpm_bakery/blob/main/Clock-sound-effect.mp3" type="audio/mp3">
+      <source src="https://www.orangefreesounds.com/wp-content/uploads/2022/04/Small-bell-ringing-short-sound-effect.mp3" type="audio/mp3">
     </audio>
     """
     sound = st.empty()
