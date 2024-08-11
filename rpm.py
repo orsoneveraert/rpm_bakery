@@ -29,6 +29,8 @@ if 'goal_reached' not in st.session_state:
     st.session_state.goal_reached = False
 if 'notified' not in st.session_state:
     st.session_state.notified = False
+if 'audio_enabled' not in st.session_state:
+    st.session_state.audio_enabled = False
 
 def format_time(seconds):
     hours = int(seconds // 3600)
@@ -58,7 +60,8 @@ def create_audio_notification():
 
 def trigger_notification():
     st.balloons()
-    st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
+    if st.session_state.audio_enabled:
+        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
 
 # Language dictionary
 lang = {
@@ -80,7 +83,8 @@ lang = {
         'set_goal': "Set Goal",
         'time_to_goal': "Time to Goal",
         'goal_reached': "Goal Reached!",
-        'time_over_goal': "Time Over Goal"
+        'time_over_goal': "Time Over Goal",
+        'enable_audio': "Enable Audio"
     },
     'fr': {
         'title': "Minuteur et Compteur de TPM du Mélangeur",
@@ -100,13 +104,22 @@ lang = {
         'set_goal': "Définir Objectif",
         'time_to_goal': "Temps jusqu'à l'Objectif",
         'goal_reached': "Objectif Atteint !",
-        'time_over_goal': "Temps Au-delà de l'Objectif"
+        'time_over_goal': "Temps Au-delà de l'Objectif",
+        'enable_audio': "Activer l'Audio"
     }
 }
 
 # App layout
 st.title(lang[st.session_state.language]['title'])
 create_audio_notification()
+
+# Audio enable button
+audio_col, _ = st.columns([1, 3])
+with audio_col:
+    if st.button("🔊 " + lang[st.session_state.language]['enable_audio']):
+        st.session_state.audio_enabled = True
+        st.success("Audio enabled!")
+        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
 
 # Timer display
 timer_display = st.empty()
