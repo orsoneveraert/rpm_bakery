@@ -41,27 +41,21 @@ def format_time(seconds):
 def calculate_turns(seconds, rpm):
     return (seconds / 60) * rpm
 
-def create_audio_notification():
-    return st.markdown(
-        """
-        <audio id="myAudio">
-          <source src="https://cdn.freesound.org/previews/80/80921_1022651-lq.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-        </audio>
-        <script>
-        var audio = document.getElementById("myAudio");
-        function playAudio() {
-            audio.play();
-        }
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
+def play_notification_sound():
+    html_string = """
+    <audio controls autoplay>
+      <source src="https://www.orangefreesounds.com/wp-content/uploads/2022/04/Small-bell-ringing-short-sound-effect.mp3" type="audio/mp3">
+    </audio>
+    """
+    sound = st.empty()
+    sound.markdown(html_string, unsafe_allow_html=True)
+    time.sleep(2)  # wait for 2 seconds to finish the playing of the audio
+    sound.empty()  # delete the element afterwards
 
 def trigger_notification():
     st.balloons()
     if st.session_state.audio_enabled:
-        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
+        play_notification_sound()
 
 # Language dictionary
 lang = {
@@ -111,7 +105,6 @@ lang = {
 
 # App layout
 st.title(lang[st.session_state.language]['title'])
-create_audio_notification()
 
 # Audio toggle
 audio_col, _ = st.columns([1, 3])
@@ -122,7 +115,7 @@ with audio_col:
         key="audio_toggle"
     )
     if st.session_state.audio_enabled:
-        st.markdown('<script>playAudio();</script>', unsafe_allow_html=True)
+        play_notification_sound()
 
 # Timer display
 timer_display = st.empty()
