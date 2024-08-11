@@ -30,24 +30,28 @@ def init_session_state():
         st.session_state.goal_reached = False
     if 'notified' not in st.session_state:
         st.session_state.notified = False
+    if 'mixers' not in st.session_state:
+        st.session_state.mixers = []
+    if 'mixers_loaded' not in st.session_state:
+        st.session_state.mixers_loaded = False
 
 init_session_state()
 
 # Load mixers from local storage
 def load_mixers():
-    mixers_json = streamlit_js_eval(js_expressions='localStorage.getItem("mixers")', key='load_mixers')
-    if mixers_json:
-        return json.loads(mixers_json)
-    return []
+    if not st.session_state.mixers_loaded:
+        mixers_json = streamlit_js_eval(js_expressions='localStorage.getItem("mixers")', key='load_mixers')
+        if mixers_json:
+            st.session_state.mixers = json.loads(mixers_json)
+        st.session_state.mixers_loaded = True
 
 # Save mixers to local storage
-def save_mixers(mixers):
-    mixers_json = json.dumps(mixers)
+def save_mixers():
+    mixers_json = json.dumps(st.session_state.mixers)
     streamlit_js_eval(js_expressions=[f'localStorage.setItem("mixers", \'{mixers_json}\')'], key='save_mixers')
 
-# Initialize mixers from local storage
-if 'mixers' not in st.session_state:
-    st.session_state.mixers = load_mixers()
+# Load mixers at the start of the app
+load_mixers()
 
 def format_time(seconds):
     hours = int(seconds // 3600)
@@ -215,8 +219,9 @@ if st.button(lang[st.session_state.language]['save']):
     speeds = [s for s in [speed1, speed2, speed3] if s > 0]
     if mixer_name and speeds:
         st.session_state.mixers.append({"name": mixer_name, "speeds": speeds})
-        save_mixers(st.session_state.mixers)  # Save to local storage
+        save_mixers()  # Save to local storage
         st.success(f"Mixer '{mixer_name}' saved successfully!")
+        st.rerun()
 
 # Display Saved Mixers
 st.header(lang[st.session_state.language]['saved_mixers'])
@@ -231,7 +236,7 @@ for i, mixer in enumerate(st.session_state.mixers):
                     st.session_state.countdown_time = (st.session_state.rpm_goal / speed) * 60
         if st.button(lang[st.session_state.language]['delete'], key=f"delete_{i}"):
             st.session_state.mixers.pop(i)
-            save_mixers(st.session_state.mixers)  # Save to local storage
+            save_mixers()  # Save to local storage
             st.rerun()
 
 # Language selection
