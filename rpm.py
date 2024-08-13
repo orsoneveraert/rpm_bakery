@@ -2,17 +2,18 @@ import streamlit as st
 import pandas as pd
 import math
 import json
-import os
+import io
 from fpdf import FPDF
 
 PRODUCT_DATABASE_PATH = 'product_database.json'
 GENERAL_TODOS_PATH = 'general_todos.json'
 
 def load_json(filepath):
-    if os.path.exists(filepath):
+    try:
         with open(filepath, 'r') as f:
             return json.load(f)
-    return {}
+    except FileNotFoundError:
+        return {}
 
 def save_json(filepath, data):
     with open(filepath, 'w') as f:
@@ -26,8 +27,6 @@ def init_session(session_key):
         st.session_state.checklist = pd.DataFrame(session_data.get('checklist', []), columns=['Produit', 'Quantité'])
     if 'general_todos' not in st.session_state:
         st.session_state.general_todos = load_json(GENERAL_TODOS_PATH).get('todos', [])
-    if 'pdf_generated' not in st.session_state:
-        st.session_state.pdf_generated = False
 
 def save_current_session(session_key):
     session_data = {'checklist': st.session_state.checklist.to_dict(orient='records')}
@@ -111,8 +110,7 @@ def generate_pdf_checklist():
                     pdf.cell(0, 10, f"[ ] {subtask['name']}", 0, 1)
             pdf.ln(5)
     
-    pdf.output("checklist.pdf")
-    st.session_state.pdf_generated = True
+    return pdf.output(dest='S').encode('latin-1')
 
 def render_checklist():
     st.header("📋 Checklist - Mise en place")
@@ -172,20 +170,14 @@ def render_checklist():
             
             st.markdown("---")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Générer PDF"):
-            generate_pdf_checklist()
-            st.session_state.pdf_generated = True
-            st.success("Checklist PDF générée !")
-            st.rerun()
-
-    with col2:
-        if st.session_state.get('pdf_generated', False) and os.path.exists("checklist.pdf"):
-            with open("checklist.pdf", "rb") as f:
-                st.download_button("Télécharger la checklist PDF", f, "checklist.pdf")
-        elif st.session_state.get('pdf_generated', False):
-            st.error("Le fichier PDF n'a pas pu être généré. Veuillez réessayer.")
+    if st.button("Générer et Télécharger PDF"):
+        pdf = generate_pdf_checklist()
+        st.download_button(
+            label="Télécharger la checklist PDF",
+            data=pdf,
+            file_name=f"checklist_{st.session_state.session_key}.pdf",
+            mime="application/pdf"
+        )
 
 def manage_products():
     st.subheader("Gestion des Produits")
