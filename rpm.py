@@ -172,14 +172,20 @@ def render_checklist():
             
             st.markdown("---")
 
-    if st.button("Générer PDF"):
-        generate_pdf_checklist()
-        st.success("Checklist PDF générée !")
-        st.rerun()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Générer PDF"):
+            generate_pdf_checklist()
+            st.session_state.pdf_generated = True
+            st.success("Checklist PDF générée !")
+            st.rerun()
 
-    if st.session_state.pdf_generated and os.path.exists("checklist.pdf"):
-        with open("checklist.pdf", "rb") as f:
-            st.download_button("Télécharger la checklist PDF", f, "checklist.pdf")
+    with col2:
+        if st.session_state.get('pdf_generated', False) and os.path.exists("checklist.pdf"):
+            with open("checklist.pdf", "rb") as f:
+                st.download_button("Télécharger la checklist PDF", f, "checklist.pdf")
+        elif st.session_state.get('pdf_generated', False):
+            st.error("Le fichier PDF n'a pas pu être généré. Veuillez réessayer.")
 
 def manage_products():
     st.subheader("Gestion des Produits")
