@@ -3,7 +3,6 @@ import pandas as pd
 import math
 import json
 import io
-from fpdf import FPDF
 
 PRODUCT_DATABASE_PATH = 'product_database.json'
 GENERAL_TODOS_PATH = 'general_todos.json'
